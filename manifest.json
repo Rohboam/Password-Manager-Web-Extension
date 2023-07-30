@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Password Manager",
+  "version": "1.0",
+  "description": "A simple password manager",
+  "icons": {
+    "48": "icon.png"
+  },
+  "browser_action": {
+    "newtab": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "web_accessible_resources": [
+    "password_manager.html"
+  ]
+}
