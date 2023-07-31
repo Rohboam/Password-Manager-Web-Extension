@@ -99,6 +99,7 @@ async function encryptPassword(password, encryptionKey) {
 
 // Function to save passwords to Chrome storage
 async function savePassword(site, username, password) {
+  
   try {
     const encryptionKey = await crypto.subtle.generateKey(
       {
@@ -131,17 +132,48 @@ async function savePassword(site, username, password) {
 
 // Function to handle account creation
 function handleAccountCreation() {
+  // // alert('Please enter a valid username and password.');
 
-  const newUsername = document.getElementById('newUsername').value;
-  const newPassword = document.getElementById('newPassword').value;
+  // const passwordManagerContainer = document.querySelector('.container');
+  // const accountCreationContainer = document.getElementById('accountCreationContainer');
 
-  if (!newUsername || !newPassword) {
-    alert('Please enter a valid username and password.');
-    return;
+  // passwordManagerContainer.style.display = 'none';
+  // accountCreationContainer.style.display = 'block';
+
+  
+  // const newUsername = document.getElementById('newUsername').value;
+  // const newPassword = document.getElementById('newPassword').value;
+
+  // // Get the elements
+  // const newUsernameElement = document.getElementById('newUsername');
+  // const newPasswordElement = document.getElementById('newPassword');
+
+  // // Assign values to the elements
+  // newUsernameElement.value = 'test';
+  // newPasswordElement.value = '1234';
+
+  // console.log('newUsername:', newUsername);
+  // console.log('newPassword:', newPassword);
+
+  // if (!newUsername || !newPassword) {
+  //   alert('Please enter a valid username and password.');
+  //   return;
+  // }
+
+  // // Save the username and password to Chrome storage
+  // savePassword(newUsername, newUsername, newPassword); // Use the username as the site for simplicity
+
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+  alert('Please enter a valid username and password.');
+  return;
   }
 
-  // Save the username and password to Chrome storage
-  savePassword(newUsername, newUsername, newPassword); // Use the username as the site for simplicity
+    // Save the username and password to Chrome storage
+  savePassword(username, username, password); // Use the username as the site for simplicity
+  
 }
 
 
@@ -155,17 +187,17 @@ function openAccountCreationWindow() {
   passwordManagerContainer.style.display = 'none';
   accountCreationContainer.style.display = 'block';
 
-  const newUsername = document.getElementById('newUsername').value;
-  const newPassword = document.getElementById('newPassword').value;
+  // const newUsername = document.getElementById('newUsername').value;
+  // const newPassword = document.getElementById('newPassword').value;
 
-  if (!newUsername || !newPassword) {
-    alert('Please enter a valid username and password.');
-    return;
-  }
+  // if (!newUsername || !newPassword) {
+  //   alert('Please enter a valid username and password.');
+  //   return;
+  // }
 
-  alert('Please enter a valid username and password.');
-  // Save the username and password to Chrome storage
-  savePassword(newUsername, newUsername, newPassword); // Use the username as the site for simplicity
+  // alert('Please enter a valid username and password.');
+  // // Save the username and password to Chrome storage
+  // savePassword(newUsername, newUsername, newPassword); // Use the username as the site for simplicity
 }
 
 // Function to go back to the main password manager UI
@@ -178,7 +210,7 @@ function goBackToPasswordManager() {
 }
 
 
-document.getElementById('loginButton').addEventListener('click', handleLogin);
+document.getElementById('loginButton').addEventListener('click', handleAccountCreation);
 document.getElementById('generatePasswordButton').addEventListener('click', handleGeneratePassword);
 // Add event listener for the "Create Account" button
 document.getElementById('createAccountButton').addEventListener('click', openAccountCreationWindow);
