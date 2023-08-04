@@ -1,3 +1,6 @@
+// Function to store original passwords in memory (for demonstration purposes only)
+const passwordMemory = {};
+
 // Function to get stored passwords from Chrome storage
 function getStoredPasswords(callback) {
   chrome.storage.sync.get(['passwords'], function (result) {
@@ -62,17 +65,27 @@ function handleLogin() {
     return;
   }
 
-  // Get the stored passwords
   getStoredPasswords(function (passwords) {
     const storedPassword = passwords[username];
-    if (storedPassword && storedPassword.password === password) {
-      // On successful login, show stored passwords
-      const passwordList = document.getElementById('passwordList');
-      passwordList.innerHTML = '';
-      for (const [site, storedPasswordObject] of Object.entries(passwords)) {
-        const li = document.createElement('li');
-        li.textContent = `${site}: ${storedPasswordObject.password}`;
-        passwordList.appendChild(li);
+
+    if (storedPassword) {
+      // Hash the input password to compare with the stored hashed password
+      const hashedInputPassword = sha256(password);
+
+      if (storedPassword.password === hashedInputPassword) {
+        // On successful login, show stored passwords
+        const passwordList = document.getElementById('passwordList');
+        passwordList.innerHTML = '';
+
+        for (const [site, storedPasswordObject] of Object.entries(passwords)) {
+          // Retrieve the original password from memory and display it
+          const originalPassword = passwordMemory[storedPasswordObject.password];
+          const li = document.createElement('li');
+          li.textContent = `${site}: ${originalPassword}`;
+          passwordList.appendChild(li);
+        }
+      } else {
+        alert('Invalid username or password. Please try again.');
       }
     } else {
       alert('Invalid username or password. Please try again.');
@@ -88,9 +101,16 @@ function getAllStoredPasswords(callback) {
   });
 }
 
+
 function savePassword(site, username, password) {
+  // Hash the password before saving it
+  const hashedPassword = sha256(password);
+
+  // Store the original password in memory (for demonstration purposes only)
+  passwordMemory[hashedPassword] = password;
+
   getStoredPasswords(function (passwords) {
-    passwords[username] = { password: password };
+    passwords[username] = { password: hashedPassword };
     savePasswords(passwords);
     alert('Password saved successfully!');
   });

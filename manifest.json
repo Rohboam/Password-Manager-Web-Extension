@@ -18,6 +18,7 @@
     "storage"
   ],
   "web_accessible_resources": [
-    "password_manager.html"
+    "password_manager.html",
+    "sha256.js"
   ]
 }
