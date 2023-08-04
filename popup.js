@@ -37,7 +37,71 @@ function generatePassword() {
   for (let i = 0; i < length; i++) {
     password += charset.charAt(Math.floor(Math.random() * charset.length));
   }
+
+  // Calculate the password strength score
+  const passwordStrength = calculatePasswordStrength(password);
+
+  // Display the password strength score and recommendations
+  displayPasswordStrength(passwordStrength);
+
   return password;
+}
+
+
+// Function to calculate password strength based on various criteria
+function calculatePasswordStrength(password) {
+  const minLength = 8; // Minimum length required for a strong password
+  const maxLength = 64; // Maximum length for a strong password
+
+  // Length score: Increase score linearly with password length
+  const lengthScore = Math.min((password.length - minLength) / (maxLength - minLength) * 100, 100);
+
+  // Complexity score: Increase score based on the presence of upper-case, lower-case, numbers, and special characters
+  let complexityScore = 0;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChars = /[!@#$%^&*()_+-=[]{}|;:,.<>?]/.test(password);
+
+  const complexityCount = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChars].filter(Boolean).length;
+  complexityScore = complexityCount * 25; // Increase score by 25 for each complexity criteria met
+
+  // Repetition score: Penalize passwords with repeating characters
+  const repeatingChars = /(.)\1{2,}/.test(password);
+  const repeatingScore = repeatingChars ? -50 : 0;
+
+  // Dictionary word score: Penalize passwords that contain common dictionary words
+  const commonWords = ["password", "123456", "qwerty", "letmein", "admin", "welcome", "monkey", "password1"];
+  const containsCommonWord = commonWords.some(word => password.toLowerCase().includes(word));
+  const commonWordScore = containsCommonWord ? -50 : 0;
+
+  // Calculate the total score for the password
+  let totalScore = lengthScore + complexityScore + repeatingScore + commonWordScore;
+  totalScore = Math.max(totalScore, 0); // Ensure the total score is non-negative
+
+  return Math.min(totalScore, 100); // Cap the score at 100
+}
+
+
+// Function to display password strength score and recommendations
+function displayPasswordStrength(score) {
+  const strengthIndicator = document.getElementById('passwordStrengthIndicator');
+  const strengthText = document.getElementById('passwordStrengthText');
+
+  strengthIndicator.style.width = `${score}%`;
+  strengthText.textContent = `Password Strength: ${score}%`;
+
+  // Provide recommendations based on the score
+  if (score >= 80) {
+    strengthText.style.color = 'green';
+    strengthText.textContent += ' (Strong)';
+  } else if (score >= 50) {
+    strengthText.style.color = 'orange';
+    strengthText.textContent += ' (Moderate)';
+  } else {
+    strengthText.style.color = 'red';
+    strengthText.textContent += ' (Weak). Please consider increasing length and complexity.';
+  }
 }
 
 // Function to handle password generation and display the generated password
@@ -64,6 +128,12 @@ function handleLogin() {
     alert('Please enter a valid username and password.');
     return;
   }
+
+  // Calculate the password strength score for the entered password
+  const passwordStrength = calculatePasswordStrength(password);
+
+  // Display the password strength score and recommendations
+  displayPasswordStrength(passwordStrength);
 
   getStoredPasswords(function (passwords) {
     const storedPassword = passwords[username];
