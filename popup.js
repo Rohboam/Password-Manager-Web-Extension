@@ -3,7 +3,7 @@ const passwordMemory = {};
 
 // Function to get stored passwords from Chrome storage
 function getStoredPasswords(callback) {
-  chrome.storage.sync.get(['passwords'], function (result) {
+  chrome.storage.local.get(['passwords'], function (result) {
     const passwords = result.passwords || {};
     callback(passwords);
   });
@@ -11,7 +11,7 @@ function getStoredPasswords(callback) {
 
 // Function to save passwords to Chrome storage
 function savePasswords(passwords) {
-  chrome.storage.sync.set({ passwords: passwords });
+  chrome.storage.local.set({ passwords: passwords });
 }
 
 // Function to generate a random password based on options
@@ -73,17 +73,8 @@ function handleLogin() {
       const hashedInputPassword = sha256(password);
 
       if (storedPassword.password === hashedInputPassword) {
-        // On successful login, show stored passwords
-        const passwordList = document.getElementById('passwordList');
-        passwordList.innerHTML = '';
-
-        for (const [site, storedPasswordObject] of Object.entries(passwords)) {
-          // Retrieve the original password from memory and display it
-          const originalPassword = passwordMemory[storedPasswordObject.password];
-          const li = document.createElement('li');
-          li.textContent = `${site}: ${originalPassword}`;
-          passwordList.appendChild(li);
-        }
+        // On successful login, display stored passwords
+        displayStoredPasswords(passwords);
       } else {
         alert('Invalid username or password. Please try again.');
       }
@@ -93,24 +84,57 @@ function handleLogin() {
   });
 }
 
-function getAllStoredPasswords(callback) {
-  chrome.storage.sync.get(['passwords'], function (result) {
-    const passwords = result.passwords || {};
-    console.log(passwords);
-    callback(passwords);
-  });
+function generateUUID() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function displayStoredPasswords(passwords) {
+  const passwordTable = document.getElementById('passwordTable');
+  const passwordList = document.getElementById('passwordList');
+  passwordList.innerHTML = '';
+
+  for (const [site, storedPasswordObject] of Object.entries(passwords)) {
+    // Retrieve the original username and password from memory using the UUID
+    const uuid = storedPasswordObject.uuid;
+    const passwordInfo = passwordMemory[uuid];
+
+    if (!passwordInfo) {
+      console.log(`Original password for site "${site}" is not available.`);
+      continue;
+    }
+
+    const { username, password } = passwordInfo;
+
+    // Create a new table row
+    const row = document.createElement('tr');
+
+    // Add username to the first cell
+    const usernameCell = document.createElement('td');
+    usernameCell.textContent = username;
+    row.appendChild(usernameCell);
+
+    // Add the original password to the second cell
+    const passwordCell = document.createElement('td');
+    passwordCell.textContent = password;
+    row.appendChild(passwordCell);
+
+    passwordList.appendChild(row);
+  }
 }
 
 
 function savePassword(site, username, password) {
+  // Generate a unique identifier (UUID) for this password entry
+  const uuid = generateUUID();
+
   // Hash the password before saving it
   const hashedPassword = sha256(password);
 
-  // Store the original password in memory (for demonstration purposes only)
-  passwordMemory[hashedPassword] = password;
+  // Store the original username and password in memory (for demonstration purposes only)
+  passwordMemory[uuid] = { username, password };
 
   getStoredPasswords(function (passwords) {
-    passwords[username] = { password: hashedPassword };
+    passwords[username] = { password: hashedPassword, uuid: uuid };
     savePasswords(passwords);
     alert('Password saved successfully!');
   });
